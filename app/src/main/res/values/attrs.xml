@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ScheduleView">
+        <attr name="columnNumber" format="integer" />
+        <attr name="rowHeight" format="dimension" />
+        <attr name="lineSize" format="dimension" />
+        <attr name="lineColor" format="color" />
+        <attr name="bgColor" format="color" />
+        <attr name="hourTextSize" format="dimension" />
+        <attr name="hourTextColor" format="color" />
+        <attr name="hourTextBgColor" format="color" />
+        <attr name="pastTimeColor" format="color" />
+        <attr name="pastTimeLineColor" format="color" />
+        <attr name="pastTimeNowTextColor" format="color" />
+        <attr name="pastTimeNowTextSize" format="dimension" />
+        <attr name="addTextColor" format="color" />
+        <attr name="addBgColor" format="color" />
+        <attr name="addTextSize" format="dimension" />
+        <attr name="allDayCountTextSize" format="dimension" />
+        <attr name="allDayCountTextColor" format="color" />
+        <attr name="allDayTextSize" format="dimension" />
+        <attr name="allDayTextColor" format="color" />
+        <attr name="allDayTextBgColor" format="color" />
+        <attr name="allDayHeight" format="dimension" />
+        <attr name="eventTextSize" format="dimension" />
+        <attr name="eventTextColor" format="color" />
+        <attr name="eventTextBgColor" format="color" />
+        <attr name="eventTextBgLineColor" format="color" />
+    </declare-styleable>
+</resources>
