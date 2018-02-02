@@ -1,17 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.skw.scheduleview.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <com.skw.scheduleview.view.ScheduleView
+        android:id="@+id/weekViewWeek"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffff"
+        app:addBgColor="#dff4ff"
+        app:addTextColor="#47a1f6"
+        app:addTextSize="26sp"
+        app:allDayCountTextColor="#5e636d"
+        app:allDayCountTextSize="14sp"
+        app:allDayHeight="30dp"
+        app:allDayTextBgColor="#85cdca"
+        app:allDayTextColor="#ffffff"
+        app:allDayTextSize="12sp"
+        app:bgColor="#ffffff"
+        app:columnNumber="7"
+        app:eventTextBgColor="#85cdca"
+        app:eventTextBgLineColor="#dfdfdf"
+        app:eventTextColor="#ffffff"
+        app:eventTextSize="12sp"
+        app:hourTextBgColor="#ffffff"
+        app:hourTextColor="#525252"
+        app:hourTextSize="10sp"
+        app:lineColor="#dfdfdf"
+        app:lineSize="1dp"
+        app:pastTimeColor="#eff5f9"
+        app:pastTimeLineColor="#5e636c"
+        app:pastTimeNowTextColor="#ffffff"
+        app:pastTimeNowTextSize="10sp"
+        app:rowHeight="60dp" />
 </RelativeLayout>

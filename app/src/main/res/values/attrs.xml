@@ -27,4 +27,5 @@
         <attr name="eventTextBgColor" format="color" />
         <attr name="eventTextBgLineColor" format="color" />
     </declare-styleable>
+
 </resources>
