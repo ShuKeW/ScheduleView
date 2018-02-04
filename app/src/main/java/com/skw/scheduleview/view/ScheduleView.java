@@ -2,10 +2,13 @@ package com.skw.scheduleview.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.text.TextPaint;
@@ -18,7 +21,9 @@ import android.widget.OverScroller;
 
 import com.skw.scheduleview.R;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * @创建人 weishukai
@@ -103,6 +108,7 @@ public class ScheduleView extends View {
     private int eventTextColor;
     private int eventBgColor;
     private int eventBgLineColor;
+    private List<EventRect> eventRectList = new ArrayList<EventRect>();
 
     private Calendar firstDay;
     private Calendar endDay;
@@ -188,7 +194,7 @@ public class ScheduleView extends View {
                 if (velocityY > 0) {//向下,认max
                     overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, 0, (int) (Math.abs(originOffset.y) + allDayEventShowHeight));
                 } else {//反之
-                    overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, (int) (24 * (rowHeight + lineSize) - getHeight() - Math.abs(originOffset.y)), 0);
+                    overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, -(int) (24 * (rowHeight + lineSize) - getHeight() + allDayEventShowHeight - Math.abs(originOffset.y)), 0);
                 }
             }
             ViewCompat.postInvalidateOnAnimation(ScheduleView.this);
@@ -251,8 +257,8 @@ public class ScheduleView extends View {
     private void checkOriginOffsetY() {
         if (originOffset.y >= 0) {
             originOffset.y = 0;
-        } else if (Math.abs(originOffset.y) >= (24 * (rowHeight + lineSize) - getHeight())) {
-            originOffset.y = -(24 * (rowHeight + lineSize) - getHeight());
+        } else if (Math.abs(originOffset.y) >= (24 * (rowHeight + lineSize) - getHeight() + allDayEventShowHeight)) {
+            originOffset.y = -(24 * (rowHeight + lineSize) - getHeight() + allDayEventShowHeight);
         }
     }
 
@@ -297,6 +303,9 @@ public class ScheduleView extends View {
             a.recycle();
         }
         allDayEventShowHeight = allDayEventHeight;
+        if (columnNumber <= 0) {
+            throw new IllegalArgumentException("columnNumber must > 0");
+        }
         init(context);
     }
 
@@ -309,21 +318,29 @@ public class ScheduleView extends View {
          * 初始化开始时间和结束时间，一般是一周
          */
         firstDay = Calendar.getInstance();
+        /**
+         * 这个值时周天表示本周的第一天，本view中使用周一表示第一天
+         */
         int dayOfWeek = firstDay.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek == 1) {
-            dayOfWeek = -6;
-        } else {
-            dayOfWeek = -(dayOfWeek - 2);
+        Log.d(TAG, "++++" + dayOfWeek);
+        if (columnNumber > 1) {
+            if (dayOfWeek == 1) {
+                dayOfWeek = -6;
+            } else {
+                dayOfWeek = -(dayOfWeek - 2);
+            }
+            firstDay.add(Calendar.DAY_OF_WEEK, dayOfWeek);
         }
-        firstDay.add(Calendar.DAY_OF_WEEK, dayOfWeek);
         firstDay.set(Calendar.HOUR_OF_DAY, 0);
         firstDay.set(Calendar.MINUTE, 0);
         firstDay.set(Calendar.SECOND, 0);
+        firstDay.set(Calendar.MILLISECOND, 0);
         endDay = (Calendar) firstDay.clone();
         endDay.add(Calendar.DAY_OF_WEEK, columnNumber - 1);
         endDay.set(Calendar.HOUR_OF_DAY, 23);
         endDay.set(Calendar.MINUTE, 59);
         endDay.set(Calendar.SECOND, 59);
+        firstDay.set(Calendar.MILLISECOND, 1000);
 
         /**
          * 初始化手势相关
@@ -410,10 +427,10 @@ public class ScheduleView extends View {
         /**
          * 计算列的宽度
          */
-        if (columnNumber > 1) {
-            columnWidth = (getWidth() - 2 * hourTextWidth - (columnNumber + 1) * lineSize) / columnNumber;
-        } else {
+        if (columnNumber == 1) {
             columnWidth = getWidth() - hourTextWidth - lineSize;
+        } else {
+            columnWidth = (getWidth() - 2 * hourTextWidth - (columnNumber + 1) * lineSize) / columnNumber;
         }
 
         /**
@@ -425,37 +442,10 @@ public class ScheduleView extends View {
         }
 
         drawPastTime(canvas);
+        drawHour(canvas);
+        drawLine(canvas);
+        drawEvents(canvas);
 
-    }
-
-    private void drawPastTime(Canvas canvas) {
-        Calendar today = Calendar.getInstance();
-        if (today.after(firstDay) && today.before(endDay)) {
-            int dayNumber = today.get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR);
-            int hourNumber = today.get(Calendar.HOUR_OF_DAY);
-            int minuteNumber = today.get(Calendar.MINUTE);
-
-            /**
-             * 画左边整天的
-             */
-            if (dayNumber > 0) {
-                float left = hourTextWidth;
-                float top = allDayEventShowHeight;
-                float right = hourTextWidth + dayNumber * (columnWidth + lineSize);
-                float bottom = getHeight();
-                canvas.drawRect(left, top, right, bottom, pastTimePaint);
-            }
-
-            /**
-             * 画今天整小时
-             */
-            float leftToday = hourTextWidth + dayNumber * columnWidth + dayNumber * lineSize;
-            float rightToday = leftToday + columnWidth + lineSize;
-            float topTodayHour = allDayEventShowHeight;
-            float bottomTodayHour = hourNumber * (rowHeight + lineSize) + originOffset.y + allDayEventShowHeight;
-            canvas.drawRect(leftToday, topTodayHour, rightToday, bottomTodayHour, pastTimePaint);
-
-        }
     }
 
     /**
@@ -486,4 +476,274 @@ public class ScheduleView extends View {
         Log.d(TAG, "goToCurrentHour originOffset.y:" + originOffset.y);
 //        mDistanceYAll = Math.abs(originOffset.y);
     }
+
+    private void drawPastTime(Canvas canvas) {
+        Calendar today = Calendar.getInstance();
+        if (today.after(firstDay) && today.before(endDay)) {
+            int dayNumber = today.get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR);
+            int hourNumber = today.get(Calendar.HOUR_OF_DAY);
+            int minuteNumber = today.get(Calendar.MINUTE);
+
+            /**
+             * 画左边整天的
+             */
+            if (dayNumber > 0) {
+                float left = hourTextWidth;
+                float top = allDayEventShowHeight;
+                float right = hourTextWidth + dayNumber * (columnWidth + lineSize);
+                float bottom = getHeight();
+                canvas.drawRect(left, top, right, bottom, pastTimePaint);
+            }
+
+            /**
+             * 画今天整小时
+             */
+
+            float leftToday = hourTextWidth + dayNumber * columnWidth + dayNumber * lineSize;
+            float rightToday = leftToday + columnWidth + lineSize;
+            float bottomTodayHour = hourNumber * (rowHeight + lineSize) + originOffset.y + allDayEventShowHeight;
+            /**
+             * 只画显示的时候
+             */
+            if (bottomTodayHour > allDayEventShowHeight) {
+                float topTodayHour = allDayEventShowHeight;
+                canvas.drawRect(leftToday, topTodayHour, rightToday, bottomTodayHour, pastTimePaint);
+            }
+
+            /**
+             * 画今天不满一小时的部分
+             */
+            float topTodayMinute = hourNumber * (rowHeight + lineSize) + originOffset.y + allDayEventShowHeight;
+            float bottomTodayMinute = topTodayMinute + rowHeight / 60 * minuteNumber;
+            if (bottomTodayMinute > allDayEventShowHeight) {
+                if (topTodayMinute < allDayEventShowHeight) {
+                    topTodayMinute = allDayEventShowHeight;
+                }
+                canvas.drawRect(leftToday, topTodayMinute, rightToday, bottomTodayMinute, pastTimePaint);
+            }
+        }
+    }
+
+    /**
+     * 画时间
+     */
+    private void drawHour(Canvas canvas) {
+        for (int i = 0; i < 24; i++) {
+            float y = i * rowHeight + (i + 1) * lineSize + originOffset.y + allDayEventShowHeight;
+            if (i == 0) {
+                y += hourTextSize;
+            } else {
+                y += (hourTextSize / 3);
+            }
+            /**
+             * 同理，只画屏幕内显示的
+             */
+            if (y <= getHeight() + hourTextSize && y >= allDayEventShowHeight - hourTextSize) {
+                canvas.drawText("" + i + "时", (float) (hourTextWidth * 0.8) / 2, y, hourTextPaint);
+            }
+
+            // canvas.drawText("时", mHourTextWidth / 2, top + 2 * mHourTextSize
+            // + mHourTextSize / 2, mHourTextAmPaint);
+            // if (top > mAllDayEventShowHeight - mHourTextSize && top <
+            // mAllDayEventShowHeight + mRowHeight - mHourTextSize) {
+            // if (i > 12) {
+            // canvas.drawText("下午", mHourTextWidth / 2, top + 2 *
+            // mHourTextSize, mHourTextAmPaint);
+            // } else {
+            // canvas.drawText("上午", mHourTextWidth / 2, top + 2 *
+            // mHourTextSize, mHourTextAmPaint);
+            // }
+            // }
+        }
+    }
+
+    /**
+     * 重写画线的方法 不再按照小格子一根一根的短线来话
+     *
+     * @param canvas
+     */
+    private void drawLine(Canvas canvas) {
+        /**
+         * 画固定的竖线
+         */
+        for (int i = 0; i < columnNumber + 1; i++) {
+            float startX = hourTextWidth + i * lineSize + i * columnWidth;
+            float startY = allDayEventShowHeight;
+            canvas.drawLine(startX, startY, startX, startY + getHeight(), linePaint);
+        }
+        /**
+         * 画24根横线,可根据自己需求改变循环次数来决定是否画
+         */
+        for (int i = 0; i < 24; i++) {
+            float startX = 0;
+            if (i > 0) {
+                startX = hourTextWidth - hourTextWidth / 4 + 3;
+            }
+            float startY = allDayEventShowHeight + i * lineSize + i * rowHeight + originOffset.y;
+            if (startY >= allDayEventShowHeight && startY <= getHeight()) {
+                canvas.drawLine(startX, startY, startX + getWidth(), startY, linePaint);
+            }
+        }
+    }
+
+    private void drawEvents(Canvas canvas) {
+        if (eventRectList != null && eventRectList.size() > 0) {
+            for (int i = 0; i < eventRectList.size(); i++) {
+                EventRect eventRect = eventRectList.get(i);
+                RectF eventRectF = null;
+                RectF eventRectFLineKuang = null;
+                RectF eventRectFHeadLine = null;
+                if (columnNumber == 1) {
+                    eventRectFLineKuang = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffset.y, eventRect.rectF.right, eventRect.rectF.bottom + originOffset.y);
+                    eventRectFHeadLine = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffset.y + 1, eventRect.rectF.left + 2 * lineSize, eventRect.rectF.bottom + originOffset.y - 1);
+                    eventRectF = new RectF(eventRect.rectF.left + 2 * lineSize, eventRect.rectF.top + originOffset.y + 1, eventRect.rectF.right - 1, eventRect.rectF.bottom + originOffset.y - 1);
+                } else {
+                    eventRectFLineKuang = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffset.y, eventRect.rectF.right, eventRect.rectF.bottom + originOffset.y);
+                    eventRectFHeadLine = new RectF(eventRect.rectF.left + 1, eventRect.rectF.top + originOffset.y, eventRect.rectF.right - 1, eventRect.rectF.top + originOffset.y + 2 * lineSize);
+                    eventRectF = new RectF(eventRect.rectF.left + 1, eventRect.rectF.top + originOffset.y + 2 * lineSize, eventRect.rectF.right - 1, eventRect.rectF.bottom + originOffset.y - 1);
+                }
+                if (eventRectFLineKuang.top > getHeight() && eventRectFLineKuang.bottom < allDayEventShowHeight) {
+                    //没有显示进来就不画了
+                } else {
+                    eventBgPaint.setColor(eventRect.event.getSideLineColor() == 0 ? eventBgLineColor : eventRect.event.getSideLineColor());
+                    canvas.drawRect(eventRectFLineKuang, eventBgPaint);
+                    eventBgPaint.setColor(eventRect.event.getColor() == 0 ? eventBgColor : eventRect.event.getColor());
+                    canvas.drawRect(eventRectF, eventBgPaint);
+                    eventBgPaint.setColor(eventRect.event.getHeadLineColor() == 0 ? eventBgLineColor : eventRect.event.getHeadLineColor());
+                    canvas.drawRect(eventRectFHeadLine, eventBgPaint);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 传入events
+     *
+     * @param scheduleViewEventList
+     */
+    public void setEvents(List<ScheduleViewEvent> scheduleViewEventList) {
+        if (scheduleViewEventList != null && scheduleViewEventList.size() > 0) {
+            sortEvents(scheduleViewEventList);
+            groupEvents(scheduleViewEventList);
+            invalidate();
+        }
+    }
+
+
+    /**
+     * 按照开始时间来排序所有event，当然如果源数据已经排好了可以省略这一步
+     * 排序的目的是为了便于把相交的event分在一组
+     *
+     * @param scheduleViewEventList
+     */
+    private void sortEvents(List<ScheduleViewEvent> scheduleViewEventList) {
+        ScheduleViewEvent temp;
+        boolean hasChange;
+        for (int i = 0; i < scheduleViewEventList.size(); i++) {
+            hasChange = false;
+            for (int j = 0; j < scheduleViewEventList.size() - i - 1; j++) {
+                if (scheduleViewEventList.get(j).getStartTime().compareTo(scheduleViewEventList.get(j + 1).getStartTime()) > 0) {
+                    temp = scheduleViewEventList.get(j);
+                    scheduleViewEventList.set(j, scheduleViewEventList.get(j + 1));
+                    scheduleViewEventList.set((j + 1), temp);
+                    hasChange = true;
+                }
+            }
+            if (!hasChange) {
+                break;
+            }
+
+        }
+    }
+
+    /**
+     * 将event有交集的分为一组,前提是已经排序了
+     *
+     * @param scheduleViewEventList
+     */
+    private List<List<ScheduleViewEvent>> groupEvents(List<ScheduleViewEvent> scheduleViewEventList) {
+        List<List<ScheduleViewEvent>> scheduleViewEventGroup = new ArrayList<>();
+
+        Calendar endTime = null;
+
+        for (int i = 0; i < scheduleViewEventList.size(); i++) {
+            ScheduleViewEvent event = scheduleViewEventList.get(i);
+            if (endTime == null || event.getStartTime().compareTo(endTime) > 0) {
+                scheduleViewEventGroup.add(new ArrayList<ScheduleViewEvent>());
+                /**
+                 * 放在这里计算出在页面的rect
+                 * 因为分组的目的就是为了计算出在一组的事件在页面的width，因为width = columnWidth/groupIndex.size
+                 * 所以避免了再做循环计算，就在此处计算了
+                 */
+                if (scheduleViewEventGroup.size() > 1) {
+                    eventRectList.addAll(calculateEventRect(scheduleViewEventGroup.get(scheduleViewEventGroup.size() - 2)));
+                }
+            }
+            scheduleViewEventGroup.get(scheduleViewEventGroup.size() - 1).add(event);
+            if (endTime == null || event.getEndTime().compareTo(endTime) > 0) {
+                endTime = event.getEndTime();
+            }
+        }
+        /**
+         * 当循环完成之后，把最后一组计算了
+         */
+        eventRectList.addAll(calculateEventRect(scheduleViewEventGroup.get(scheduleViewEventGroup.size() - 1)));
+        return scheduleViewEventGroup;
+    }
+
+    /**
+     * 将分组了event计算出在页面的rect
+     *
+     * @param groupIndex
+     */
+    private List<EventRect> calculateEventRect(List<ScheduleViewEvent> groupIndex) {
+        List<EventRect> eventRectList = new ArrayList<>();
+        for (int i = 0; i < groupIndex.size(); i++) {
+            ScheduleViewEvent event = groupIndex.get(i);
+            EventRect eventRect = new EventRect();
+            eventRect.event = event;
+            float width = (columnWidth + lineSize) / groupIndex.size();
+            if (event.getStartTime().compareTo(firstDay) < 0) {
+                event.setStartTime(firstDay);
+            }
+            if (event.getEndTime().compareTo(endDay) > 0) {
+                event.setEndTime(endDay);
+            }
+            int dayOfWeek = event.getStartTime().get(Calendar.DAY_OF_WEEK) - firstDay.get(Calendar.DAY_OF_WEEK);
+            if (dayOfWeek == -1) {
+                dayOfWeek = 6;
+            }
+            eventRect.rectF.left = hourTextWidth + dayOfWeek * columnWidth + dayOfWeek * lineSize + i * width;
+            eventRect.rectF.right = eventRect.rectF.left + width;
+            /**
+             * 计算的时候，和originOffset无关，只需要计算出在整个表格中的位置，然后在绘制的根据originOffset来确定当前的位置
+             * 最后+allDayEventShowHeight的原因是因为顶格显示全天事件，图表以及事件都是从全天事件之下开始绘制，相当于其实坐标不再是0，而是allDayEventShowHeight
+             */
+            eventRect.rectF.top = event.getStartTime().get(Calendar.HOUR_OF_DAY) * (rowHeight + lineSize) + rowHeight / 60 * event.getStartTime().get(Calendar.MINUTE) + allDayEventShowHeight;
+            eventRect.rectF.bottom = event.getEndTime().get(Calendar.HOUR_OF_DAY) * (rowHeight + lineSize) + rowHeight / 60 * event.getEndTime().get(Calendar.MINUTE) + allDayEventShowHeight;
+            eventRectList.add(eventRect);
+
+        }
+        return eventRectList;
+    }
+
+    /**
+     * 将事件转换成图形上的坐标对象
+     */
+    private class EventRect {
+
+        public ScheduleViewEvent event;
+
+        public RectF rectF = new RectF();
+
+        public EventRect() {
+        }
+
+        public EventRect(ScheduleViewEvent event, RectF rectF) {
+            this.event = event;
+            this.rectF = rectF;
+        }
+    }
+
 }

@@ -3,4 +3,30 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!-- 自建日晨  -->
+    <color name="sch_create_headline">#41a7f6</color>
+    <color name="sch_create_bg">#dff4ff</color>
+    <color name="sch_create_sideline">#cbedff</color>
+    <color name="sch_create_text">#41a7f6</color>
+    <!-- 生日  -->
+    <color name="sch_birthday_headline">#ff4949</color>
+    <color name="sch_birthday_bg">#fff2f2</color>
+    <color name="sch_birthday_sideline">#ffdfdf</color>
+    <color name="sch_birthday_text">#ff4949</color>
+    <!-- 联络提醒  -->
+    <color name="sch_contact_headline">#1dc2b4</color>
+    <color name="sch_contact_bg">#caf9f5</color>
+    <color name="sch_contact_sideline">#abf6f0</color>
+    <color name="sch_contact_text">#1dc2b4</color>
+    <!-- 订阅  -->
+    <color name="sch_subscribe_headline">#556fb5</color>
+    <color name="sch_subscribe_bg">#dce3f4</color>
+    <color name="sch_subscribe_sideline">#b6caff</color>
+    <color name="sch_subscribe_text">#556fb5</color>
+    <!--  节假日 -->
+    <color name="sch_holiday_headline">#ffaf4d</color>
+    <color name="sch_holiday_bg">#fff7ee</color>
+    <color name="sch_holiday_sideline">#ffd9ab</color>
+    <color name="sch_holiday_text">#ffaf4d</color>
 </resources>

@@ -10,6 +10,25 @@ import java.util.Calendar;
 
 public class ScheduleViewEvent {
     /**
+     * 自建日程
+     */
+    public static final int SCHEDULE_TYPE_CREATE = 1;
+
+    /**
+     * 生日
+     */
+    public static final int SCHEDULE_TYPE_BIRTHDAY = 2;
+
+    /**
+     * 节假日
+     */
+    public static final int SCHEDULE_TYPE_HOLIDY = 3;
+
+    /**
+     * 待联络
+     */
+    public static final int SCHEDULE_TYPE_CONTACT = 4;
+    /**
      * 日程的类型
      */
     private int scheduleType;
