@@ -3,9 +3,9 @@ package com.skw.scheduleview;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.skw.scheduleview.view.ScheduleView;
 import com.skw.scheduleview.view.ScheduleViewEvent;
@@ -13,7 +13,6 @@ import com.skw.scheduleview.view.ScheduleViewEvent;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 public class MainActivity extends FragmentActivity {
     private static final String TAG = "MainActivity";
@@ -26,6 +25,12 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         scheduleView = (ScheduleView) findViewById(R.id.scheduleView);
+        scheduleView.setOnEventAddClickListener(new ScheduleView.OnEventAddClickListener() {
+            @Override
+            public void onEventAddClicked(Calendar time) {
+                Toast.makeText(getApplicationContext(), time.getTime().toString(), Toast.LENGTH_LONG).show();
+            }
+        });
         textView1 = (TextView) findViewById(R.id.text1);
         textView2 = (TextView) findViewById(R.id.text2);
         textView3 = (TextView) findViewById(R.id.text3);

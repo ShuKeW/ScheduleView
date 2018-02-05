@@ -11,9 +11,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:orientation="horizontal"
         android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:orientation="horizontal">
+        android:paddingRight="20dp">
 
         <TextView
             android:id="@+id/text1"
@@ -83,12 +83,14 @@
         app:addTextSize="26sp"
         app:allDayCountTextColor="#5e636d"
         app:allDayCountTextSize="14sp"
+        app:allDayEventBgColor="#ffffff"
+        app:allDayEventDefaultColor="#85cdca"
         app:allDayHeight="30dp"
-        app:allDayTextBgColor="#85cdca"
-        app:allDayTextColor="#ffffff"
-        app:allDayTextSize="12sp"
         app:bgColor="#ffffff"
         app:columnNumber="7"
+        app:currentTimeColor="#5e636c"
+        app:currentTimeTextColor="#ffffff"
+        app:currentTimeTextSize="10sp"
         app:eventTextBgColor="#85cdca"
         app:eventTextBgLineColor="#dfdfdf"
         app:eventTextColor="#ffffff"
@@ -99,8 +101,5 @@
         app:lineColor="#dfdfdf"
         app:lineSize="1dp"
         app:pastTimeColor="#eff5f9"
-        app:pastTimeLineColor="#5e636c"
-        app:pastTimeNowTextColor="#ffffff"
-        app:pastTimeNowTextSize="10sp"
         app:rowHeight="60dp" />
 </LinearLayout>
