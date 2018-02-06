@@ -111,6 +111,8 @@ public class ScheduleView extends View {
     private float allDayEventHeight;
     private float allDayEventShowHeight;
     private List<EventRect> allDayEventRectList = new ArrayList<EventRect>();
+    //全天事件每天的事件数
+    private int[] allDayEVentCountList;
 
     /**
      * 事件相关
@@ -780,6 +782,7 @@ public class ScheduleView extends View {
      * @param scheduleViewEventList
      */
     public void setEvents(List<ScheduleViewEvent> scheduleViewEventList) {
+        eventRectList.clear();
         if (scheduleViewEventList != null && scheduleViewEventList.size() > 0) {
             sortEvents(scheduleViewEventList);
             groupEvents(scheduleViewEventList);
@@ -886,6 +889,138 @@ public class ScheduleView extends View {
     }
 
     /**
+     * 传入全天事件
+     *
+     * @param allDayEventList
+     */
+    public void setAllDayEvents(List<ScheduleViewEvent> allDayEventList) {
+        allDayEventRectList.clear();
+        if (allDayEventList != null && allDayEventList.size() > 0) {
+            List<EventRect> eventRectList = getAllDayEventCountList(allDayEventList);
+            List<EventRect>[] eventListArr = sortAndGroupAllDayEventList(eventRectList);
+            combinAllDayEventList(eventListArr);
+        }
+
+    }
+
+    /**
+     * 获取每天有几个事件
+     *
+     * @param allDayEventList
+     */
+    private List<EventRect> getAllDayEventCountList(List<ScheduleViewEvent> allDayEventList) {
+        allDayEVentCountList = new int[columnNumber];
+        List<EventRect> eventRectList = new ArrayList<>();
+        for (ScheduleViewEvent event : allDayEventList) {
+            EventRect eventRect = getAllDayEventIndex(event);
+            eventRectList.add(eventRect);
+            int startIndex = eventRect.startIndex;
+            while (startIndex < eventRect.endIndex) {
+                allDayEVentCountList[startIndex]++;
+                startIndex++;
+            }
+        }
+        return eventRectList;
+    }
+
+    /**
+     * 将时间转换为下标
+     *
+     * @param event
+     * @return
+     */
+    private EventRect getAllDayEventIndex(ScheduleViewEvent event) {
+        EventRect eventRect = new EventRect();
+        eventRect.event = event;
+        if (columnNumber == 1) {
+            eventRect.startIndex = 0;
+            eventRect.endIndex = 1;
+        } else {
+            if (event.getStartTime().before(firstDay)) {
+                eventRect.startIndex = 0;
+            } else {
+                int dayOfWeek = event.getStartTime().get(Calendar.DAY_OF_WEEK);
+                if (dayOfWeek == 1) {
+                    dayOfWeek = 6;
+                } else {
+                    dayOfWeek -= 2;
+                }
+                eventRect.startIndex = dayOfWeek;
+            }
+            if (event.getEndTime().after(endDay)) {
+                eventRect.endIndex = 7;
+            } else {
+                int dayOfWeek = event.getEndTime().get(Calendar.DAY_OF_WEEK);
+                if (dayOfWeek == 1) {
+                    dayOfWeek = 7;
+                } else {
+                    dayOfWeek -= 1;
+                }
+                eventRect.endIndex = dayOfWeek;
+            }
+        }
+        return eventRect;
+    }
+
+    /**
+     * 分组排序全天事件
+     *
+     * @param eventRectList
+     */
+    private List<EventRect>[] sortAndGroupAllDayEventList(List<EventRect> eventRectList) {
+        List<EventRect>[] scheduleListArr = new List[columnNumber];
+        /**
+         * 按照列数来循环
+         */
+        for (int i = 0; i < columnNumber; i++) {
+            for (EventRect eventRect : eventRectList) {
+                if (i == eventRect.startIndex) {
+                    for (int j = scheduleListArr[i].size() - 1; j >= 0; j--) {
+                        /**
+                         * 起始时间一样的事件按照事件的跨度来排序
+                         */
+                        if ((eventRect.endIndex - eventRect.startIndex) <= (scheduleListArr[i].get(j).endIndex - scheduleListArr[i].get(j).startIndex)) {
+                            if (j == scheduleListArr[i].size() - 1) {
+                                scheduleListArr[i].add(eventRect);
+                            } else {
+                                scheduleListArr[i].add(j + 1, eventRect);
+                            }
+                            eventRectList.remove(eventRect);
+                        }
+                    }
+                }
+            }
+        }
+        return scheduleListArr;
+    }
+
+    /**
+     * 排序全天事件，是指绘制顺序
+     * 规则：按照开始时间顺序，尽可能多的把事件排在一行，这样节省页面上的空间
+     *
+     * @param eventListArr
+     */
+    private void combinAllDayEventList(List<EventRect>[] eventListArr) {
+        List<List<EventRect>> allDayEventGroupList = new ArrayList<>();
+        for (int i = 0; i < eventListArr.length - 1; i++) {
+            for (EventRect eventRect : eventListArr[i]) {
+                List<EventRect> eventRectList = new ArrayList<>();
+                allDayEventGroupList.add(eventRectList);
+                eventRectList.add(eventRect);
+                for (int j = i + 1; j < eventListArr.length; j++) {
+                    if (eventRectList.get(eventRectList.size() - 1).endIndex <= eventListArr[j].get(0).startIndex) {
+                        eventRectList.add(eventListArr[j].get(0));
+                        eventListArr[j].remove(0);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
      * 将事件转换成图形上的坐标对象
      */
     private class EventRect {
@@ -893,6 +1028,12 @@ public class ScheduleView extends View {
         public ScheduleViewEvent event;
 
         public RectF rectF = new RectF();
+
+        /**
+         * 全天事件的开始时间转换成开始和结束天，便于计算
+         */
+        public int startIndex;
+        public int endIndex;
 
         public EventRect() {
         }

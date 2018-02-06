@@ -41,19 +41,17 @@ public class ScheduleViewEvent {
      * 结束时间
      */
     private Calendar endTime;
-    /**
-     * 开始时间转换成图标上的开始值
-     */
-    private int startIndex;
-    private int endIndex;
-    /**
-     * 是否是全天事件
-     */
-    private boolean isAllDayEvent;
+
     /**
      * 日程的内容
      */
     private String content;
+
+    /**
+     * 是否是全天事件
+     */
+    private boolean isAllDayEvent;
+
     /**
      * 块的颜色
      */
@@ -101,22 +99,6 @@ public class ScheduleViewEvent {
 
     public void setEndTime(Calendar endTime) {
         this.endTime = endTime;
-    }
-
-    public int getStartIndex() {
-        return startIndex;
-    }
-
-    public void setStartIndex(int startIndex) {
-        this.startIndex = startIndex;
-    }
-
-    public int getEndIndex() {
-        return endIndex;
-    }
-
-    public void setEndIndex(int endIndex) {
-        this.endIndex = endIndex;
     }
 
     public boolean isAllDayEvent() {
