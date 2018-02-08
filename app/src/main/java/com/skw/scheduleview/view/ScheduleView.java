@@ -101,14 +101,19 @@ public class ScheduleView extends View {
     /**
      * 全天事件的样式信息
      */
-    private Paint allDayEventBgPaint;
+    private Paint allDayEventTitlePaint;
     private Paint allDayEventPaint;
     private Paint allDayEventCountPaint;
     private int allDayEventBgColor;
+    private float allDayEventTitleSize;
+    private int allDayEventTitleColor;
     private int allDayEventDefaultColor;
     private float allDayEventCountTextSize;
     private int allDayEventCountTextColor;
-    private float allDayEventHeight;
+    private float allDayEventRowHeight;
+    private int allDayEventMinRow;
+    private int allDayEventMaxRow;
+    private int allDayEventCurrRow;
     private float allDayEventShowHeight;
     private List<EventRect> allDayEventRectList = new ArrayList<EventRect>();
     //全天事件每天的事件数
@@ -352,11 +357,15 @@ public class ScheduleView extends View {
             addTextSize = a.getDimension(R.styleable.ScheduleView_addTextSize, addTextSize);
             addTextColor = a.getColor(R.styleable.ScheduleView_addTextColor, addTextColor);
             addBgColor = a.getColor(R.styleable.ScheduleView_addBgColor, addBgColor);
+            allDayEventBgColor = a.getColor(R.styleable.ScheduleView_allDayEventBgColor, allDayEventBgColor);
             allDayEventCountTextSize = a.getDimension(R.styleable.ScheduleView_allDayCountTextSize, allDayEventCountTextSize);
             allDayEventCountTextColor = a.getColor(R.styleable.ScheduleView_allDayCountTextColor, allDayEventCountTextColor);
-            allDayEventBgColor = a.getColor(R.styleable.ScheduleView_allDayEventBgColor, allDayEventBgColor);
+            allDayEventTitleColor = a.getColor(R.styleable.ScheduleView_allDayEventTitleColor, allDayEventTitleColor);
+            allDayEventTitleSize = a.getDimension(R.styleable.ScheduleView_allDayEventTitleSize, allDayEventTitleSize);
             allDayEventDefaultColor = a.getColor(R.styleable.ScheduleView_allDayEventDefaultColor, allDayEventDefaultColor);
-            allDayEventHeight = a.getDimension(R.styleable.ScheduleView_allDayHeight, allDayEventHeight);
+            allDayEventRowHeight = a.getDimension(R.styleable.ScheduleView_allDayEventRowHeight, allDayEventRowHeight);
+            allDayEventMinRow = a.getInt(R.styleable.ScheduleView_allDayEventMinRow, allDayEventMinRow);
+            allDayEventMaxRow = a.getInt(R.styleable.ScheduleView_allDayEventMaxRow, allDayEventMaxRow);
             eventTextSize = a.getDimension(R.styleable.ScheduleView_eventTextSize, eventTextSize);
             eventTextColor = a.getColor(R.styleable.ScheduleView_eventTextColor, eventTextColor);
             eventBgColor = a.getColor(R.styleable.ScheduleView_eventTextBgColor, eventBgColor);
@@ -364,7 +373,8 @@ public class ScheduleView extends View {
         } finally {
             a.recycle();
         }
-        allDayEventShowHeight = allDayEventHeight;
+        allDayEventCurrRow = allDayEventMinRow;
+        allDayEventShowHeight = allDayEventRowHeight * allDayEventMinRow;
         if (columnNumber <= 0) {
             throw new IllegalArgumentException("columnNumber must > 0");
         }
@@ -468,8 +478,11 @@ public class ScheduleView extends View {
         /**
          * 初始化全天
          */
-        allDayEventBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        allDayEventBgPaint.setColor(allDayEventBgColor);
+        allDayEventTitlePaint = new Paint();
+        allDayEventTitlePaint.setAntiAlias(true);
+        allDayEventTitlePaint.setTextAlign(Paint.Align.CENTER);
+        allDayEventTitlePaint.setColor(allDayEventTitleColor);
+        allDayEventTitlePaint.setTextSize(allDayEventTitleSize);
         allDayEventPaint = new Paint();
         allDayEventPaint.setColor(allDayEventDefaultColor);
         allDayEventCountPaint = new TextPaint();
@@ -743,22 +756,29 @@ public class ScheduleView extends View {
             /**
              * step 1:画背景
              */
-            canvas.drawRect(0, 0, getWidth(), allDayEventShowHeight, allDayEventBgPaint);
-            /**
-             * step 2:画过去的时间
-             */
-            Calendar today = Calendar.getInstance();
-            int year = today.get(Calendar.YEAR) - firstDay.get(Calendar.YEAR);
-            if (year == 0) {
-                int dayNumber = today.get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR) + 1;
-                float right = hourTextWidth + dayNumber * (columnWidth + lineSize);
-                canvas.drawRect(hourTextWidth, 0, right, allDayEventShowHeight, pastTimePaint);
-            } else if (year < 0) {
-                canvas.drawRect(hourTextWidth, 0, getWidth() - hourTextWidth, allDayEventShowHeight, pastTimePaint);
-            }
+            allDayEventPaint.setColor(allDayEventBgColor);
+            canvas.drawRect(0, 0, getWidth(), allDayEventShowHeight, allDayEventPaint);
 
             /**
-             * 画竖线
+             * step 2:画最上边一条线
+             */
+            canvas.drawLine(0, 0, getWidth(), lineSize, linePaint);
+            /**
+             * step 2:画过去的时间
+             * 注释，因为过去的时间和下面过去的时间容易造成视图上的不清晰
+             */
+//            Calendar today = Calendar.getInstance();
+//            int year = today.get(Calendar.YEAR) - firstDay.get(Calendar.YEAR);
+//            if (year == 0) {
+//                int dayNumber = today.get(Calendar.DAY_OF_YEAR) - firstDay.get(Calendar.DAY_OF_YEAR) + 1;
+//                float right = hourTextWidth + dayNumber * (columnWidth + lineSize);
+//                canvas.drawRect(hourTextWidth, 0, right, allDayEventShowHeight, pastTimePaint);
+//            } else if (year < 0) {
+//                canvas.drawRect(hourTextWidth, 0, getWidth() - hourTextWidth, allDayEventShowHeight, pastTimePaint);
+//            }
+
+            /**
+             * step 3:画竖线
              */
             for (int i = 0; i < (columnNumber + 1); i++) {
                 float startX = hourTextWidth + i * (columnWidth + lineSize);
@@ -769,9 +789,37 @@ public class ScheduleView extends View {
             }
 
             /**
+             * step 4：画左边标题
+             */
+            canvas.drawText("全天", hourTextWidth / 2, allDayEventRowHeight * 2, allDayEventTitlePaint);
+
+            /**
+             * step 5:画事件
+             */
+            if (allDayEventRectList != null && allDayEventRectList.size() > 0) {
+                for (EventRect allDayEventRect : allDayEventRectList) {
+                    RectF eventRectF = null;
+                    RectF eventRectFLineKuang = null;
+                    RectF eventRectFHeadLine = null;
+                    eventRectFLineKuang = new RectF(allDayEventRect.rectF.left, allDayEventRect.rectF.top + originOffset.y, allDayEventRect.rectF.right, allDayEventRect.rectF.bottom + originOffset.y);
+                    eventRectFHeadLine = new RectF(allDayEventRect.rectF.left, allDayEventRect.rectF.top + originOffset.y + 1, allDayEventRect.rectF.left + 2 * lineSize, allDayEventRect.rectF.bottom + originOffset.y - 1);
+                    eventRectF = new RectF(eventRect.rectF.left + 2 * lineSize, eventRect.rectF.top + originOffset.y + 1, eventRect.rectF.right - 1, eventRect.rectF.bottom + originOffset.y - 1);
+                    if (eventRectFLineKuang.top > getHeight() && eventRectFLineKuang.bottom < allDayEventShowHeight) {
+                        //没有显示进来就不画了
+                    } else {
+                        eventBgPaint.setColor(eventRect.event.getSideLineColor() == 0 ? eventBgLineColor : eventRect.event.getSideLineColor());
+                        canvas.drawRect(eventRectFLineKuang, eventBgPaint);
+                        eventBgPaint.setColor(eventRect.event.getColor() == 0 ? eventBgColor : eventRect.event.getColor());
+                        canvas.drawRect(eventRectF, eventBgPaint);
+                        eventBgPaint.setColor(eventRect.event.getHeadLineColor() == 0 ? eventBgLineColor : eventRect.event.getHeadLineColor());
+                        canvas.drawRect(eventRectFHeadLine, eventBgPaint);
+                    }
+                }
+            }
+
+            /**
              * 画全天时间块的上下两根线
              */
-            canvas.drawLine(0, 0, getWidth(), lineSize, linePaint);
             canvas.drawLine(0, allDayEventShowHeight, getWidth(), allDayEventShowHeight + lineSize, linePaint);
         }
     }
@@ -903,6 +951,7 @@ public class ScheduleView extends View {
 
     }
 
+
     /**
      * 获取每天有几个事件
      *
@@ -1012,12 +1061,23 @@ public class ScheduleView extends View {
                         eventRectList.add(eventListArr[j].get(0));
                         eventListArr[j].remove(0);
                     } else {
+                        allDayEventRectList.addAll(calculateAllDayEventRectList(eventRectList, allDayEventGroupList.size() - 1));
                         break;
                     }
                 }
             }
         }
+        allDayEventCurrRow = allDayEventGroupList.size();
+    }
 
+    private List<EventRect> calculateAllDayEventRectList(List<EventRect> eventRectList, int rowNumber) {
+        for (EventRect eventRect : eventRectList) {
+            eventRect.rectF.left = eventRect.startIndex * (columnNumber + lineSize);
+            eventRect.rectF.right = eventRect.endIndex * (columnNumber + lineSize) - lineSize;
+            eventRect.rectF.top = rowNumber * allDayEventRowHeight + lineSize;
+            eventRect.rectF.top = rowNumber * allDayEventRowHeight + allDayEventRowHeight + lineSize;
+        }
+        return eventRectList;
     }
 
     /**

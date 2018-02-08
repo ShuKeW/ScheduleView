@@ -52,6 +52,12 @@ public class MainActivity extends FragmentActivity {
                 createEvents();
             }
         });
+        textView2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createAllDayEvents();
+            }
+        });
 
     }
 
@@ -443,6 +449,6 @@ public class MainActivity extends FragmentActivity {
         }
 
 
-        scheduleView.setEvents(scheduleViewEventList);
+        scheduleView.setAllDayEvents(scheduleViewEventList);
     }
 }
