@@ -61,7 +61,7 @@ public class MainActivity extends FragmentActivity {
 
     }
 
-    private void createEvents() {
+    private void createAllDayEvents() {
         List<ScheduleViewEvent> scheduleViewEventList = new ArrayList<>();
         Calendar firstDay = Calendar.getInstance();
         int dayOfWeek = firstDay.get(Calendar.DAY_OF_WEEK);
@@ -136,21 +136,21 @@ public class MainActivity extends FragmentActivity {
             event.setStartTime(startTime);
             event.setEndTime(endTime);
             switch (i) {
-                case 0:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CREATE);
-                    event.setColor(res.getColor(R.color.sch_create_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_create_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_create_headline));
-                    event.setTextColor(res.getColor(R.color.sch_create_text));
+                case 4:
+                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_HOLIDY);
+                    event.setColor(res.getColor(R.color.sch_holiday_bg));
+                    event.setSideLineColor(res.getColor(R.color.sch_holiday_sideline));
+                    event.setHeadLineColor(res.getColor(R.color.sch_holiday_headline));
+                    event.setTextColor(res.getColor(R.color.sch_holiday_text));
                     break;
-                case 1:
+                case 5:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_BIRTHDAY);
                     event.setColor(res.getColor(R.color.sch_birthday_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_birthday_sideline));
                     event.setHeadLineColor(res.getColor(R.color.sch_birthday_headline));
                     event.setTextColor(res.getColor(R.color.sch_birthday_text));
                     break;
-                case 2:
+                case 6:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CONTACT);
                     event.setColor(res.getColor(R.color.sch_contact_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_contact_sideline));
@@ -158,12 +158,6 @@ public class MainActivity extends FragmentActivity {
                     event.setTextColor(res.getColor(R.color.sch_contact_text));
                     break;
                 case 3:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_HOLIDY);
-                    event.setColor(res.getColor(R.color.sch_holiday_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_holiday_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_holiday_headline));
-                    event.setTextColor(res.getColor(R.color.sch_holiday_text));
-                    break;
             }
             scheduleViewEventList.add(event);
         }
@@ -180,33 +174,26 @@ public class MainActivity extends FragmentActivity {
             event.setStartTime(startTime);
             event.setEndTime(endTime);
             switch (i) {
-                case 0:
+                case 7:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CREATE);
                     event.setColor(res.getColor(R.color.sch_create_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_create_sideline));
                     event.setHeadLineColor(res.getColor(R.color.sch_create_headline));
                     event.setTextColor(res.getColor(R.color.sch_create_text));
                     break;
-                case 1:
+                case 8:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_BIRTHDAY);
                     event.setColor(res.getColor(R.color.sch_birthday_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_birthday_sideline));
                     event.setHeadLineColor(res.getColor(R.color.sch_birthday_headline));
                     event.setTextColor(res.getColor(R.color.sch_birthday_text));
                     break;
-                case 2:
+                case 9:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CONTACT);
                     event.setColor(res.getColor(R.color.sch_contact_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_contact_sideline));
                     event.setHeadLineColor(res.getColor(R.color.sch_contact_headline));
                     event.setTextColor(res.getColor(R.color.sch_contact_text));
-                    break;
-                case 3:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_HOLIDY);
-                    event.setColor(res.getColor(R.color.sch_holiday_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_holiday_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_holiday_headline));
-                    event.setTextColor(res.getColor(R.color.sch_holiday_text));
                     break;
             }
             scheduleViewEventList.add(event);
@@ -224,43 +211,51 @@ public class MainActivity extends FragmentActivity {
             event.setStartTime(startTime);
             event.setEndTime(endTime);
             switch (i) {
-                case 0:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CREATE);
-                    event.setColor(res.getColor(R.color.sch_create_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_create_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_create_headline));
-                    event.setTextColor(res.getColor(R.color.sch_create_text));
-                    break;
-                case 1:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_BIRTHDAY);
-                    event.setColor(res.getColor(R.color.sch_birthday_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_birthday_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_birthday_headline));
-                    event.setTextColor(res.getColor(R.color.sch_birthday_text));
-                    break;
-                case 2:
+                case 10:
                     event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_CONTACT);
                     event.setColor(res.getColor(R.color.sch_contact_bg));
                     event.setSideLineColor(res.getColor(R.color.sch_contact_sideline));
                     event.setHeadLineColor(res.getColor(R.color.sch_contact_headline));
                     event.setTextColor(res.getColor(R.color.sch_contact_text));
                     break;
-                case 3:
-                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_HOLIDY);
-                    event.setColor(res.getColor(R.color.sch_holiday_bg));
-                    event.setSideLineColor(res.getColor(R.color.sch_holiday_sideline));
-                    event.setHeadLineColor(res.getColor(R.color.sch_holiday_headline));
-                    event.setTextColor(res.getColor(R.color.sch_holiday_text));
+                case 11:
+                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_BIRTHDAY);
+                    event.setColor(res.getColor(R.color.sch_birthday_bg));
+                    event.setSideLineColor(res.getColor(R.color.sch_birthday_sideline));
+                    event.setHeadLineColor(res.getColor(R.color.sch_birthday_headline));
+                    event.setTextColor(res.getColor(R.color.sch_birthday_text));
+                    break;
+            }
+            scheduleViewEventList.add(event);
+        }
+
+        for (int i = 12; i < 20; i++) {
+            event = new ScheduleViewEvent();
+            event.setId(i);
+            event.setContent("日程" + i);
+            event.setAllDayEvent(true);
+            startTime = (Calendar) firstDay.clone();
+            endTime = (Calendar) firstDay.clone();
+            endTime.add(Calendar.DAY_OF_WEEK, 6);
+            event.setStartTime(startTime);
+            event.setEndTime(endTime);
+            switch (i) {
+                default:
+                    event.setScheduleType(ScheduleViewEvent.SCHEDULE_TYPE_BIRTHDAY);
+                    event.setColor(res.getColor(R.color.sch_birthday_bg));
+                    event.setSideLineColor(res.getColor(R.color.sch_birthday_sideline));
+                    event.setHeadLineColor(res.getColor(R.color.sch_birthday_headline));
+                    event.setTextColor(res.getColor(R.color.sch_birthday_text));
                     break;
             }
             scheduleViewEventList.add(event);
         }
 
 
-        scheduleView.setEvents(scheduleViewEventList);
+        scheduleView.setAllDayEvents(scheduleViewEventList);
     }
 
-    private void createAllDayEvents() {
+    private void createEvents() {
         List<ScheduleViewEvent> scheduleViewEventList = new ArrayList<>();
         Calendar firstDay = Calendar.getInstance();
         int dayOfWeek = firstDay.get(Calendar.DAY_OF_WEEK);
@@ -449,6 +444,6 @@ public class MainActivity extends FragmentActivity {
         }
 
 
-        scheduleView.setAllDayEvents(scheduleViewEventList);
+        scheduleView.setEvents(scheduleViewEventList);
     }
 }
