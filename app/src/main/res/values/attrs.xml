@@ -22,6 +22,7 @@
         <attr name="allDayEventTitleColor" format="color" />
         <attr name="allDayEventTitleSize" format="dimension" />
         <attr name="allDayEventDefaultColor" format="color" />
+        <attr name="allDayEventSize" format="dimension" />
         <attr name="allDayEventRowHeight" format="dimension" />
         <attr name="allDayEventMinRow" format="integer" />
         <attr name="allDayEventMaxRow" format="integer" />

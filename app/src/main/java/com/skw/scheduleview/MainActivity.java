@@ -1,6 +1,7 @@
 package com.skw.scheduleview;
 
 import android.content.res.Resources;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import com.skw.scheduleview.view.ScheduleView;
 import com.skw.scheduleview.view.ScheduleViewEvent;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -28,7 +30,15 @@ public class MainActivity extends FragmentActivity {
         scheduleView.setOnEventAddClickListener(new ScheduleView.OnEventAddClickListener() {
             @Override
             public void onEventAddClicked(Calendar time) {
-                Toast.makeText(getApplicationContext(), time.getTime().toString(), Toast.LENGTH_LONG).show();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd E hh:mm");
+                String date = dateFormat.format(time.getTime());
+                Toast.makeText(getApplicationContext(), date, Toast.LENGTH_LONG).show();
+            }
+        });
+        scheduleView.setOnEventClickListener(new ScheduleView.OnEventClickListener() {
+            @Override
+            public void onEventClick(ScheduleViewEvent event, RectF eventRectF) {
+                Toast.makeText(getApplicationContext(), event.getContent(), Toast.LENGTH_LONG).show();
             }
         });
         textView1 = (TextView) findViewById(R.id.text1);
@@ -165,7 +175,7 @@ public class MainActivity extends FragmentActivity {
         for (int i = 7; i < 10; i++) {
             event = new ScheduleViewEvent();
             event.setId(i);
-            event.setContent("日程" + i);
+            event.setContent("日程日程日程日程" + i);
             event.setAllDayEvent(true);
             startTime = (Calendar) firstDay.clone();
             endTime = (Calendar) firstDay.clone();
@@ -232,7 +242,10 @@ public class MainActivity extends FragmentActivity {
         for (int i = 12; i < 20; i++) {
             event = new ScheduleViewEvent();
             event.setId(i);
-            event.setContent("日程" + i);
+            event.setContent("日程日程" + i);
+            if (i == 12) {
+                event.setContent("日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程" + i);
+            }
             event.setAllDayEvent(true);
             startTime = (Calendar) firstDay.clone();
             endTime = (Calendar) firstDay.clone();
@@ -295,7 +308,7 @@ public class MainActivity extends FragmentActivity {
         for (int i = 0; i < 4; i++) {
             event = new ScheduleViewEvent();
             event.setId(i);
-            event.setContent("日程" + i);
+            event.setContent("" + i);
             event.setAllDayEvent(false);
             startTime = (Calendar) firstDay.clone();
             endTime = (Calendar) firstDay.clone();
@@ -358,7 +371,7 @@ public class MainActivity extends FragmentActivity {
 
         event = new ScheduleViewEvent();
         event.setId(6);
-        event.setContent("日程" + 6);
+        event.setContent("日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程日程" + 6);
         event.setAllDayEvent(false);
         startTime = (Calendar) firstDay.clone();
         endTime = (Calendar) firstDay.clone();
@@ -397,10 +410,10 @@ public class MainActivity extends FragmentActivity {
         event.setTextColor(res.getColor(R.color.sch_create_text));
         scheduleViewEventList.add(event);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 3; i++) {
             event = new ScheduleViewEvent();
             event.setId(8 + i);
-            event.setContent("日程" + (8 + i));
+            event.setContent("" + (8 + i));
             event.setAllDayEvent(false);
             startTime = (Calendar) firstDay.clone();
             endTime = (Calendar) firstDay.clone();

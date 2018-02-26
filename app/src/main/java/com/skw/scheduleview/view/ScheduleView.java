@@ -14,7 +14,10 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
+import android.text.Layout;
+import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -102,12 +105,13 @@ public class ScheduleView extends View {
      * 全天事件的样式信息
      */
     private Paint allDayEventTitlePaint;
-    private Paint allDayEventPaint;
+    private TextPaint allDayEventPaint;
     private Paint allDayEventCountPaint;
     private int allDayEventBgColor;
     private float allDayEventTitleSize;
     private int allDayEventTitleColor;
     private int allDayEventDefaultColor;
+    private float allDayEventSize;
     private float allDayEventCountTextSize;
     private int allDayEventCountTextColor;
     private float allDayEventRowHeight;
@@ -116,7 +120,7 @@ public class ScheduleView extends View {
     private int allDayEventCurrRow;
     private List<EventRect> allDayEventRectList = new ArrayList<EventRect>();
     //全天事件每天的事件数
-    private int[] allDayEVentCountList;
+    private int[] allDayEventCountList;
     //全天事件的滑动距离
     private PointF originOffsetAllDay;
     private boolean isAllDayOpen;
@@ -127,7 +131,7 @@ public class ScheduleView extends View {
     /**
      * 事件相关
      */
-    private Paint eventTextPaint;
+    private TextPaint eventTextPaint;
     private Paint eventBgPaint;
     private float eventTextSize;
     private int eventTextColor;
@@ -272,19 +276,35 @@ public class ScheduleView extends View {
                         }
                         invalidate();
                         return true;
+                    } else if (e.getX() < getWidth() - hourTextWidth) {
+                        if (allDayEventRectList != null && allDayEventRectList.size() > 0) {
+                            for (EventRect eventRect : allDayEventRectList) {
+                                RectF rectF = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffsetAllDay.y, eventRect.rectF.right, eventRect.rectF.bottom + originOffsetAllDay.y);
+                                if (rectF.contains(e.getX(), e.getY())) {
+                                    if (onEventClickListener != null) {
+                                        playSoundEffect(SoundEffectConstants.CLICK);
+                                        onEventClickListener.onEventClick(eventRect.event, eventRect.rectF);
+                                        addRectF = null;
+                                        invalidate();
+                                    }
+                                    return true;
+                                }
+                            }
+                        }
                     }
 
                 } else {
                     if (eventRectList != null && eventRectList.size() > 0) {
                         for (EventRect eventRect : eventRectList) {
-                            if (eventRect.rectF.contains(e.getX(), e.getY())) {
+                            RectF rectF = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffset.y, eventRect.rectF.right, eventRect.rectF.bottom + originOffset.y);
+                            if (rectF.contains(e.getX(), e.getY())) {
                                 if (onEventClickListener != null) {
                                     playSoundEffect(SoundEffectConstants.CLICK);
                                     onEventClickListener.onEventClick(eventRect.event, eventRect.rectF);
                                     addRectF = null;
                                     invalidate();
-                                    return true;
                                 }
+                                return true;
                             }
                         }
                     }
@@ -419,6 +439,7 @@ public class ScheduleView extends View {
             allDayEventTitleColor = a.getColor(R.styleable.ScheduleView_allDayEventTitleColor, allDayEventTitleColor);
             allDayEventTitleSize = a.getDimension(R.styleable.ScheduleView_allDayEventTitleSize, allDayEventTitleSize);
             allDayEventDefaultColor = a.getColor(R.styleable.ScheduleView_allDayEventDefaultColor, allDayEventDefaultColor);
+            allDayEventSize = a.getDimension(R.styleable.ScheduleView_allDayEventSize, allDayEventSize);
             allDayEventRowHeight = a.getDimension(R.styleable.ScheduleView_allDayEventRowHeight, allDayEventRowHeight);
             allDayEventMinRow = a.getInt(R.styleable.ScheduleView_allDayEventMinRow, allDayEventMinRow);
             allDayEventMaxRow = a.getInt(R.styleable.ScheduleView_allDayEventMaxRow, allDayEventMaxRow);
@@ -540,8 +561,9 @@ public class ScheduleView extends View {
         allDayEventTitlePaint.setTextAlign(Paint.Align.CENTER);
         allDayEventTitlePaint.setColor(allDayEventTitleColor);
         allDayEventTitlePaint.setTextSize(allDayEventTitleSize);
-        allDayEventPaint = new Paint();
+        allDayEventPaint = new TextPaint();
         allDayEventPaint.setColor(allDayEventDefaultColor);
+        allDayEventPaint.setTextSize(allDayEventSize);
         allDayEventCountPaint = new TextPaint();
         allDayEventCountPaint.setAntiAlias(true);
         allDayEventCountPaint.setTextAlign(Paint.Align.CENTER);
@@ -749,9 +771,28 @@ public class ScheduleView extends View {
                     canvas.drawRect(eventRectF, eventBgPaint);
                     eventBgPaint.setColor(eventRect.event.getHeadLineColor() == 0 ? allDayEventDefaultColor : eventRect.event.getHeadLineColor());
                     canvas.drawRect(eventRectFHeadLine, eventBgPaint);
+                    if (eventRectFLineKuang.right - eventRectFLineKuang.left > eventTextSize && eventRectFLineKuang.bottom - eventRectFLineKuang.top > eventTextSize) {
+                        eventTextPaint.setColor(eventRect.event.getTextColor());
+                        drawText(eventRect.event.getContent(), canvas, eventTextPaint, eventRectF, (int) (eventRectF.right - eventRectF.left), eventTextSize);
+                    }
                 }
             }
         }
+    }
+
+    private void drawText(String text, Canvas canvas, TextPaint textPaint, RectF rectF, int width, float textSize) {
+        StaticLayout staticLayout = new StaticLayout(text, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+        if (staticLayout.getHeight() > rectF.bottom - rectF.top) {
+            int availableLineCount = (int) ((rectF.bottom - rectF.top) / (staticLayout.getHeight() / staticLayout.getLineCount()));
+            int charLineCount = (int) (width / textSize);
+            int availableWidth = (int) (availableLineCount * charLineCount * textSize);
+            CharSequence charSequence = TextUtils.ellipsize(text, textPaint, availableWidth, TextUtils.TruncateAt.END);
+            staticLayout = new StaticLayout(charSequence, textPaint, width, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, true);
+        }
+        canvas.save();
+        canvas.translate(rectF.left, rectF.top);
+        staticLayout.draw(canvas);
+        canvas.restore();
     }
 
     private void drawCurrentTime(Canvas canvas) {
@@ -865,16 +906,16 @@ public class ScheduleView extends View {
          * step 6:画事件和铃铛
          */
         if (allDayEventCurrRow > allDayEventMinRow && !isAllDayOpen) {
-            if (allDayEVentCountList != null && allDayEVentCountList.length > 0) {
-                for (int i = 0; i < allDayEVentCountList.length; i++) {
-                    if (allDayEVentCountList[i] > 0) {
+            if (allDayEventCountList != null && allDayEventCountList.length > 0) {
+                for (int i = 0; i < allDayEventCountList.length; i++) {
+                    if (allDayEventCountList[i] > 0) {
                         float left = (float) (hourTextWidth + i * (columnWidth + lineSize) + columnWidth / 2 - bell.getWidth() * 0.85);
                         float top = allDayEventShowHeight() / 2 - bell.getHeight() / 2;
                         float right = left + bell.getWidth();
                         float bottom = top + bell.getHeight();
                         RectF allDayEventBellRect = new RectF(left, top, right, bottom);
                         canvas.drawBitmap(bell, null, allDayEventBellRect, allDayEventCountPaint);
-                        canvas.drawText("" + allDayEVentCountList[i], right + allDayEventCountTextSize / 2, allDayEventShowHeight() / 2 + allDayEventCountTextSize / 2 - 3, allDayEventCountPaint);
+                        canvas.drawText("" + allDayEventCountList[i], right + allDayEventCountTextSize / 2, allDayEventShowHeight() / 2 + allDayEventCountTextSize / 2 - 3, allDayEventCountPaint);
                     }
                 }
             }
@@ -901,6 +942,10 @@ public class ScheduleView extends View {
                         canvas.drawRect(eventRectF, allDayEventPaint);
                         allDayEventPaint.setColor(allDayEventRect.event.getHeadLineColor() == 0 ? eventBgLineColor : allDayEventRect.event.getHeadLineColor());
                         canvas.drawRect(eventRectFHeadLine, allDayEventPaint);
+                        if (eventRectF.bottom - eventRectF.top > allDayEventSize && eventRectF.right - eventRectF.left > allDayEventSize) {
+                            allDayEventPaint.setColor(allDayEventRect.event.getTextColor());
+                            drawText(allDayEventRect.event.getContent(), canvas, allDayEventPaint, eventRectF, (int) (eventRectF.right - eventRectF.left), allDayEventSize);
+                        }
                     }
                 }
             }
@@ -1047,14 +1092,14 @@ public class ScheduleView extends View {
      * @param allDayEventList
      */
     private List<EventRect> getAllDayEventCountList(List<ScheduleViewEvent> allDayEventList) {
-        allDayEVentCountList = new int[columnNumber];
+        allDayEventCountList = new int[columnNumber];
         List<EventRect> eventRectList = new ArrayList<>();
         for (ScheduleViewEvent event : allDayEventList) {
             EventRect eventRect = getAllDayEventIndex(event);
             eventRectList.add(eventRect);
             int startIndex = eventRect.startIndex;
             while (startIndex < eventRect.endIndex) {
-                allDayEVentCountList[startIndex]++;
+                allDayEventCountList[startIndex]++;
                 startIndex++;
             }
         }
