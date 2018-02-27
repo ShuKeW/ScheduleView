@@ -107,4 +107,5 @@
         app:lineSize="1dp"
         app:pastTimeColor="#eff5f9"
         app:rowHeight="60dp" />
+    <!--app:columnNumber="1"-->
 </LinearLayout>

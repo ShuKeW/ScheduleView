@@ -242,7 +242,7 @@ public class ScheduleView extends View {
                         overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, -(int) (24 * (rowHeight + lineSize) - getHeight() + minAllDayEventShowHeight() - Math.abs(originOffset.y)), 0);
                     } else if (isAllDayNeedScroll()) {
                         touchPosition = flag_all_day_event;
-                        overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, -(int) (allDayEventCurrRow * allDayEventRowHeight - Math.abs(originOffset.y)), 0);
+                        overScroller.fling(0, 0, 0, (int) velocityY, 0, 0, -(int) (allDayEventCurrRow * allDayEventRowHeight - Math.abs(originOffsetAllDay.y)), 0);
                     }
                 }
             }
@@ -276,7 +276,7 @@ public class ScheduleView extends View {
                         }
                         invalidate();
                         return true;
-                    } else if (e.getX() < getWidth() - hourTextWidth) {
+                    } else if (isAllDayOpen && e.getX() < getWidth() - hourTextWidth) {
                         if (allDayEventRectList != null && allDayEventRectList.size() > 0) {
                             for (EventRect eventRect : allDayEventRectList) {
                                 RectF rectF = new RectF(eventRect.rectF.left, eventRect.rectF.top + originOffsetAllDay.y, eventRect.rectF.right, eventRect.rectF.bottom + originOffsetAllDay.y);
