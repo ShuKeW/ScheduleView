@@ -4,6 +4,7 @@
   即显示当前天所在的一周  
     1、全天事件  
       事件的时间跨度为一整天  
+      ![image](https://github.com/ShuKeW/ScheduleView/blob/master/screenshots/alldayevent.gif)
     2、普通事件  
       
  二、日视图  
